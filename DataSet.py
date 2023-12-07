@@ -1,8 +1,12 @@
+from collections import Counter
+from collections import defaultdict
+
 class DataType:
-    def __init__(self, name, categories = None, partitionPoints = None):
+    def __init__(self, name):
         self.Name = name
-        self.Categories = categories
-        self.DivisionPoints = partitionPoints
+        self.PartitionPoints = None
+        self.ValueMap = None
+        self.ReverseMap = None
 
 class DataSet:
     def Load(self, filename, colCount, rowLimit=None, hasTitleRow=False):
@@ -11,12 +15,12 @@ class DataSet:
         data = [[] for i in range(colCount)]
         with open (filename , 'r') as f:
             count = 0
-            skip = not hasTitleRow
+            skip = hasTitleRow
             for line in f:
                 if skip:
                     skip = False
                     continue
-                if count >= rowlimit: break
+                if count >= rowLimit: break
                 count += 1
                 
                 terms = line.strip().split(',')
@@ -31,18 +35,52 @@ class DataSet:
         self.Data.pop(colNum)
         self.DataTypes.pop(colNum)
 
-    def CategorizeColumn(self, colNum, name, categories):
-        for i in range(len(self.Data[colNum])):
-            try:
-                data[colNum][i] = categories.index(data[colNum][i]))
-            except ValueError:
-                print("Value ", data[colNum][i], " not found in DataType ", name, i)
-                raise
-        self.DataTypes[colNum] = new DataType(name, categories)
+    def CategorizeColumn(self, colNum, name, threshold):
+        rowCount = len(self.Data[colNum])
+
+        # Find and count the distinct values
+        counter = Counter(self.Data[colNum])
+
+        # Create a map of values to indices in order of frequency
+        # All values below the threshold get the same index
+        # Also create the reverse map
+        map={}
+        reverseMap=[]
+        index=0
+        hasOther = False
+        mostCommon = counter.most_common()
+        for pair in mostCommon:
+            if pair[0] == "?":
+                map["?"] = 0 # Replace unknown with the most common which is index 0
+            elif pair[0] == "Other":
+                hasOther = True
+            else:
+                map[pair[0]] = index
+                # All counts below the fraction threshold get the "Other" index
+                if pair[1] / rowCount >= threshold:
+                    reverseMap.append(pair[0])
+                    index += 1
+                else:
+                    hasOther = True
+        
+        if hasOther:
+            map["Other"] = index
+            reverseMap.append("Other")
+            index += 1
+
+        # Now that maps have been created, map the data
+        DataSet.MapData(self.Data[colNum], map)
+
+        # Add the DataType
+        dt = DataType(name)
+        dt.ValueMap = map
+        dt.ReverseMap = reverseMap
+        dt.MostCommon = mostCommon
+        self.DataTypes[colNum] = dt
 
     def ContinuousColumn(self, colNum, name):
         DataSet.FloatData(self.Data[colNum])
-        self.DataTypes[colNum] = new DataType(name)
+        self.DataTypes[colNum] = DataType(name)
 
     def PartitionColumn(self, colNum, name, partitionCount):
         DataSet.FloatData(self.Data[colNum]) # Convert to float
@@ -57,21 +95,25 @@ class DataSet:
             arrayFraction = arrayPoint-arrayIndex
             if arrayFraction == 0 or arrayIndex >= len(colData)-1:
                 partitionPoints[i] = colData[arrayIndex]
-            else arrayIndex < len(colData)-1:
+            else:
                 partitionPoints[i] = colData[arrayIndex]*(1-arrayFraction) + colData[arrayIndex+1]*arrayFraction
         partitionPoints[partitionCount-1] = float('inf') # Infinity
-        partitionData(colData)
-        self.DataTypes[colNum] = new DataType(name, partitionPoints = partitionPoints)
+        DataSet.PartitionData(colData, partitionPoints)
+
+        # Add the DataType
+        dt = DataType(name)
+        dt.PartitionPoints = partitionPoints
+        self.DataTypes[colNum] = dt
 
     def SetColumn(self, colNum, dataType):
-        if dataType.Categories is not None:
-            self.CategorizeColumn(colNum, dataType.Name, dataType.Categories)
+        if dataType.ValueMap is not None:
+            DataSet.MapData(self.Data[colNum], dataType.ValueMap)
         elif dataType.PartitionPoints is not None:
             DataSet.FloatData(self.Data[colNum])
             DataSet.PartitionData(self.Data[colNum], dataType.PartitionPoints)
-            self.DataTypes[colNum] = new DataType(name, partitionPoints = dataType.PartitionPoints)
-        else
-            self.ContinuousColumn(colNum, dataType.Name)
+        else:
+            DataSet.FloatData(self.Data[colNum])
+        self.DataTypes[colNum] = dataType
 
     def BinaryToSigned(self, colNum):
         col = self.Data[colNum]
@@ -79,10 +121,20 @@ class DataSet:
             col[i] = 1 if col[i] > 0 else -1
 
     @staticmethod
+    def MapData(data, map):
+        for i in range(len(data)):
+            mappedValue = map[data[i]]
+            if mappedValue is None:
+                print("Unexpected value:", data[i])
+                raise ValueError("Unexpected value: " + data[i])
+            data[i] = mappedValue
+
+    @staticmethod
     def PartitionData(data, partitionPoints):
+        pointCount = len(partitionPoints)
         for i in range(len(data)):
             datum = data[i]
-            for j in range(partitionPoints):
+            for j in range(pointCount):
                 if datum < partitionPoints[j]:
                     data[i] = j
                     break
@@ -96,7 +148,31 @@ class DataSet:
                 print("Value", data[i], "is not numeric.")
                 raise
 
-    def Dump(self):
+    def ReportDataTypes(self):
+        for i in range(len(self.DataTypes)):
+            dt = self.DataTypes[i]
+            if dt.ValueMap is not None:
+                print("%d %s: Categorized" % (i, dt.Name))
+                rowCount = len(self.Data[i])
+                mostCommonMap = defaultdict(int)
+                for pair in dt.MostCommon:
+                    mostCommonMap[pair[0]] = pair[1] / rowCount
+                for i in range(len(dt.ReverseMap)):
+                    print("  %d %s:" % (i, dt.ReverseMap[i]), end="")
+                    for pair in dt.ValueMap.items():
+                        if pair[1] == i:
+                            print(" %s(%.3f)" % (pair[0], mostCommonMap[pair[0]]), end="")
+                    print()
+            elif dt.PartitionPoints is not None:
+                print("%d %s: Partitioned" % (i, dt.Name))
+                print(" ", end="")
+                for point in dt.PartitionPoints:
+                    print("", point, end="")
+                print()
+            else:
+                print("%d %s: Continuous" % (i, dt.Name))
+
+    def ReportData(self):
         colCount = len(self.Data)
         rowCount = len(self.Data[0])
         for dt in self.DataTypes:
@@ -105,9 +181,9 @@ class DataSet:
         for row in range(0,rowCount):
             for col in range(0,colCount):
                 dt = self.DataTypes[col]
-                if dt.Categories is None:
+                if dt.ReverseMap is None:
                     print(self.Data[col][row], end="\t")
                 else:
-                    print(dt.Categories[self.Data[col][row]])
+                    print(dt.ReverseMap[self.Data[col][row]], end="\t")
             print()
         print(rowCount, "Rows")
