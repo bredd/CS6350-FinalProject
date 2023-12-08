@@ -59,7 +59,7 @@ class Id3:
         childNodes = []
         subAttributes = list(attributes) # duplicate the list
         subAttributes.remove(attr)
-        for catIndex in range(0, len(self.DataTypes[attr].Categories)):
+        for catIndex in range(0, self.DataTypes[attr].CategoryCount):
             subset = Id3.__select(S, attr, catIndex)
             if len(subset[0]) == 0:
                 childNodes.append(Id3.LeafNode(Id3.__mostCommonValue(S[labelIndex])))

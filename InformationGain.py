@@ -42,7 +42,7 @@ class InformationGain:
     def __EntropyOfAttribute(S, attribute, dataTypes):
         dt = dataTypes[attribute]
         sum = 0
-        for value in range(0, len(dt.Categories)):
+        for value in range(0, dt.CategoryCount):
             sum += InformationGain.__EntropyWhere(S, attribute, value)
         return sum
 

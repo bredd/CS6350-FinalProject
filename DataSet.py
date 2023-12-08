@@ -4,6 +4,7 @@ from collections import defaultdict
 class DataType:
     def __init__(self, name):
         self.Name = name
+        self.CategoryCount=0
         self.PartitionPoints = None
         self.ValueMap = None
         self.ReverseMap = None
@@ -73,6 +74,7 @@ class DataSet:
 
         # Add the DataType
         dt = DataType(name)
+        dt.CategoryCount = len(reverseMap)
         dt.ValueMap = map
         dt.ReverseMap = reverseMap
         dt.MostCommon = mostCommon
@@ -123,6 +125,7 @@ class DataSet:
 
         # Add the DataType
         dt = DataType(name)
+        dt.CategoryCount = len(partitionPoints)
         dt.PartitionPoints = partitionPoints
         dt.PartitionCounts = partitionCounts
         self.DataTypes[colNum] = dt
