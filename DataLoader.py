@@ -44,3 +44,11 @@ class DataLoader:
         ds.SetColumn(10, dsTrain.DataTypes[10]) #NativeCountry
         ds.IntColumn(11, "ID")
         return ds
+
+    def WritePredictions(dsTest, predictions, filename = "./predictions.csv"):
+        ids = dsTest.Data[-1]
+        with open (filename , 'w') as f:
+            f.write("ID,Prediction\n")
+            for i in range(len(ids)):
+                f.write("%d,%d\n" % (ids[i], predictions[i]))
+

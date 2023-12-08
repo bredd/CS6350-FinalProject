@@ -84,6 +84,13 @@ class Id3:
                 errors += 1
         return errors / count
 
+    def Predict(self, dataSet):
+        S = dataSet.Data
+        predictions = []
+        for i in range(0, len(S[0])):
+            predictions.append(self.Tree.Evaluate(Id3.__getRow(S, i)))
+        return predictions
+
     @staticmethod
     def __haveSameValue(a):
         firstVal = a[0]

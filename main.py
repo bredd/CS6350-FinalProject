@@ -15,5 +15,11 @@ id3 = Id3()
 id3.MaximumGainAttribute = InformationGain.EntropyMaximumGainAttribute
 id3.Train(trainData)
 print("Training Error:", id3.Test(trainData))
+print()
+
+predictions = id3.Predict(testData)
+DataLoader.WritePredictions(testData, predictions)
+print("Predictions.csv written.")
+
 
 
