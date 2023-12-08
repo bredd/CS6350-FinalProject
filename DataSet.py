@@ -94,23 +94,28 @@ class DataSet:
         partitionCount=0
         partitionPoint=0
         value=0
+        valueI=0
         valueCount=0
-        for v in colData:
+        for i in range(len(colData)):
+            v = colData[i]
             if v != value:
                 if (valueCount >= targetCount or partitionCount+targetCount >= targetCount * 1.5) and partitionCount > 0:
                     # Value can make its own partition so save the preceding partition
-                    partitionPoints.append(value)
+                    partitionPoints.append(colData[valueI] if valueI==0 else (float(colData[valueI-1])+colData[valueI])/2)
+                    #if valueI>0: print("A", colData[valueI-1], colData[valueI], colData[valueI] if valueI==0 else (colData[valueI-1]+colData[valueI])/2)
                     partitionCounts.append(partitionCount)
                     partitionCount = 0
                 if partitionCount + valueCount >= targetCount:
                     # Save this partition
-                    partitionPoints.append(v)
+                    partitionPoints.append(v if i==0 else (colData[i-1]+colData[i])/2)
+                    #if i>0: print("B", colData[i-1], colData[i])
                     partitionCounts.append(partitionCount+valueCount)
                     partitionCount = 0
                 else:
                     partitionCount += valueCount
                 valueCount = 0
                 value = v
+                valueI = i
             valueCount += 1
         partitionPoints.append(float('inf'))
         partitionCounts.append(partitionCount+valueCount)
@@ -185,7 +190,7 @@ class DataSet:
                 rowCount = len(self.Data[i])
                 print("  (%.3f)" % (dt.PartitionCounts[0]/rowCount), end="")
                 for i in range(len(dt.PartitionPoints)-1):
-                    print(" %d (%.3f)" % (dt.PartitionPoints[i], dt.PartitionCounts[i+1]/rowCount), end="")
+                    print(" %g (%.3f)" % (dt.PartitionPoints[i], dt.PartitionCounts[i+1]/rowCount), end="")
                 print()
             else:
                 print("%d %s: Continuous" % (i, dt.Name))
