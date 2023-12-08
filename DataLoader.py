@@ -19,6 +19,6 @@ class DataLoader:
         ds.PartitionColumn(8, "CapitalGain", 3)
         ds.PartitionColumn(9, "CapitalLoss", 3)
         ds.PartitionColumn(10, "HoursPerWeek", 5)
-        ds.CategorizeColumn(11, "NativeCountry", 0.05)
+        ds.CategorizeColumn(11, "NativeCountry", 0.01)
         ds.CategorizeColumn(12, "y", 0.05)
         return ds

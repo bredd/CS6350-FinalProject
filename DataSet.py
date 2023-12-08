@@ -86,23 +86,40 @@ class DataSet:
         DataSet.FloatData(self.Data[colNum]) # Convert to float
         colData = self.Data[colNum].copy() # Make a copy of the data
         colData.sort() # Sort into ascending order
-        partitionPoints = [0 for i in range(partitionCount)]
+        partitionPoints = []
+        partitionCounts = []
+        targetCount = len(colData)/partitionCount
 
         # Find the partition points
-        for i in range(partitionCount-1):
-            arrayPoint = (len(colData)/partitionCount)*i
-            arrayIndex = int(arrayPoint)
-            arrayFraction = arrayPoint-arrayIndex
-            if arrayFraction == 0 or arrayIndex >= len(colData)-1:
-                partitionPoints[i] = colData[arrayIndex]
-            else:
-                partitionPoints[i] = colData[arrayIndex]*(1-arrayFraction) + colData[arrayIndex+1]*arrayFraction
-        partitionPoints[partitionCount-1] = float('inf') # Infinity
+        partitionCount=0
+        partitionPoint=0
+        value=0
+        valueCount=0
+        for v in colData:
+            if v != value:
+                if (valueCount >= targetCount or partitionCount+targetCount >= targetCount * 1.5) and partitionCount > 0:
+                    # Value can make its own partition so save the preceding partition
+                    partitionPoints.append(value)
+                    partitionCounts.append(partitionCount)
+                    partitionCount = 0
+                if partitionCount + valueCount >= targetCount:
+                    # Save this partition
+                    partitionPoints.append(v)
+                    partitionCounts.append(partitionCount+valueCount)
+                    partitionCount = 0
+                else:
+                    partitionCount += valueCount
+                valueCount = 0
+                value = v
+            valueCount += 1
+        partitionPoints.append(float('inf'))
+        partitionCounts.append(partitionCount+valueCount)
         DataSet.PartitionData(colData, partitionPoints)
 
         # Add the DataType
         dt = DataType(name)
         dt.PartitionPoints = partitionPoints
+        dt.PartitionCounts = partitionCounts
         self.DataTypes[colNum] = dt
 
     def SetColumn(self, colNum, dataType):
@@ -165,9 +182,10 @@ class DataSet:
                     print()
             elif dt.PartitionPoints is not None:
                 print("%d %s: Partitioned" % (i, dt.Name))
-                print(" ", end="")
-                for point in dt.PartitionPoints:
-                    print("", point, end="")
+                rowCount = len(self.Data[i])
+                print("  (%.3f)" % (dt.PartitionCounts[0]/rowCount), end="")
+                for i in range(len(dt.PartitionPoints)-1):
+                    print(" %d (%.3f)" % (dt.PartitionPoints[i], dt.PartitionCounts[i+1]/rowCount), end="")
                 print()
             else:
                 print("%d %s: Continuous" % (i, dt.Name))
