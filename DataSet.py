@@ -70,7 +70,7 @@ class DataSet:
             index += 1
 
         # Now that maps have been created, map the data
-        DataSet.MapData(self.Data[colNum], map)
+        DataSet.MapData(self.Data[colNum], map, len(reverseMap)-1)
 
         # Add the DataType
         dt = DataType(name)
@@ -82,6 +82,10 @@ class DataSet:
 
     def ContinuousColumn(self, colNum, name):
         DataSet.FloatData(self.Data[colNum])
+        self.DataTypes[colNum] = DataType(name)
+
+    def IntColumn(self, colNum, name):
+        DataSet.IntData(self.Data[colNum])
         self.DataTypes[colNum] = DataType(name)
 
     def PartitionColumn(self, colNum, name, partitionCount):
@@ -136,9 +140,14 @@ class DataSet:
             data[colA][i] = cfunc(data[colA][i], data[colB][i])
         self.RemoveColumn(colB)
 
+
+    def CopyColumn(self, src, dst):
+        self.Data.insert(dst, self.Data[src])
+        self.DataTypes.insert(dst, self.DataTypes[src])
+
     def SetColumn(self, colNum, dataType):
         if dataType.ValueMap is not None:
-            DataSet.MapData(self.Data[colNum], dataType.ValueMap)
+            DataSet.MapData(self.Data[colNum], dataType.ValueMap, len(dataType.ReverseMap)-1)
         elif dataType.PartitionPoints is not None:
             DataSet.FloatData(self.Data[colNum])
             DataSet.PartitionData(self.Data[colNum], dataType.PartitionPoints)
@@ -152,12 +161,12 @@ class DataSet:
             col[i] = 1 if col[i] > 0 else -1
 
     @staticmethod
-    def MapData(data, map):
+    def MapData(data, map, otherValue):
         for i in range(len(data)):
-            mappedValue = map[data[i]]
+            mappedValue = map.get(data[i])
             if mappedValue is None:
                 print("Unexpected value:", data[i])
-                raise ValueError("Unexpected value: " + data[i])
+                mappedValue = otherValue
             data[i] = mappedValue
 
     @staticmethod
@@ -177,6 +186,15 @@ class DataSet:
                 data[i] = float(data[i])
             except:
                 print("Value", data[i], "is not numeric.")
+                raise
+
+    @staticmethod
+    def IntData(data):
+        for i in range(len(data)):
+            try:
+                data[i] = int(data[i])
+            except:
+                print("Value", data[i], "is not an integer.")
                 raise
 
     def ReportDataTypes(self):
