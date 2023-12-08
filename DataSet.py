@@ -121,7 +121,7 @@ class DataSet:
             valueCount += 1
         partitionPoints.append(float('inf'))
         partitionCounts.append(partitionCount+valueCount)
-        DataSet.PartitionData(colData, partitionPoints)
+        DataSet.PartitionData(self.Data[colNum], partitionPoints)
 
         # Add the DataType
         dt = DataType(name)
@@ -204,9 +204,9 @@ class DataSet:
             else:
                 print("%d %s: Continuous" % (i, dt.Name))
 
-    def ReportData(self):
+    def ReportData(self, maxRows):
         colCount = len(self.Data)
-        rowCount = len(self.Data[0])
+        rowCount = min(len(self.Data[0]), maxRows)
         for dt in self.DataTypes:
             print(dt.Name, end="\t")
         print()
