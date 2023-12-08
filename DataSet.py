@@ -127,6 +127,12 @@ class DataSet:
         dt.PartitionCounts = partitionCounts
         self.DataTypes[colNum] = dt
 
+    def CombineColumns(self, colA, colB, cfunc):
+        data = self.Data
+        for i in range(len(data[colA])):
+            data[colA][i] = cfunc(data[colA][i], data[colB][i])
+        self.RemoveColumn(colB)
+
     def SetColumn(self, colNum, dataType):
         if dataType.ValueMap is not None:
             DataSet.MapData(self.Data[colNum], dataType.ValueMap)
