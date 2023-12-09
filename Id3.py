@@ -18,9 +18,9 @@ class Id3:
         def Evaluate(self, args):
             return self.Label
 
-        def Print(self, level, dataTypes):
-            dt = dataTypes[len(dataTypes)-1]
-            print(level*"   ", dt.Name, "=", dt.Categories[self.Label], sep="")
+        def Print(self, level, dataTypes, maxDepth):
+            dt = dataTypes[-1]
+            print(level*"   ", dt.Name, "=", self.Label, sep="")
 
     class MidNode(Node):
         def __init__(self, attr, childNodes):
@@ -30,11 +30,12 @@ class Id3:
         def Evaluate(self, args):
             return self.ChildNodes[args[self.Attr]].Evaluate(args)
 
-        def Print(self, level, dataTypes):
+        def Print(self, level, dataTypes, maxDepth):
+            if level >= maxDepth: return
             dt = dataTypes[self.Attr]
             for i in range(0, len(self.ChildNodes)):
-                print(level*"   ", dt.Name, "=", dt.Categories[i], sep="")
-                self.ChildNodes[i].Print(level+1, dataTypes)
+                print(level*"   ", dt.Name, "=", dt.ValToString(i), sep="")
+                self.ChildNodes[i].Print(level+1, dataTypes, maxDepth)
 
     def Train(self, dataSet, maxDepth = 10000):
         attributes = list(range(0,len(dataSet.DataTypes)-1))
@@ -67,8 +68,8 @@ class Id3:
                 childNodes.append(self.__Id3(subset, subAttributes, maxDepth-1))
         return Id3.MidNode(attr, childNodes)
 
-    def PrintTree(self):
-        self.Tree.Print(0, self.DataTypes)
+    def PrintTree(self, maxDepth):
+        self.Tree.Print(0, self.DataTypes, maxDepth)
 
     def Test(self, dataSet):
         S = dataSet.Data

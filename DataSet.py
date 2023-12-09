@@ -9,6 +9,13 @@ class DataType:
         self.ValueMap = None
         self.ReverseMap = None
 
+    def ValToString(self, value):
+        if self.ReverseMap is not None:
+            return self.ReverseMap[value]
+        if self.PartitionPoints is not None:
+            return "<%g" % (self.PartitionPoints[value])
+        return str(value)
+
 class DataSet:
     def Load(self, filename, colCount, rowLimit=None, hasTitleRow=False):
         if rowLimit is None:
@@ -165,7 +172,7 @@ class DataSet:
         for i in range(len(data)):
             mappedValue = map.get(data[i])
             if mappedValue is None:
-                print("Unexpected value:", data[i])
+                #print("Unexpected value:", data[i])
                 mappedValue = otherValue
             data[i] = mappedValue
 
