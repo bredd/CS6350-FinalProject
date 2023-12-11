@@ -13,7 +13,7 @@ testData = DataLoader.LoadKaggleTest(trainData)
 
 id3 = Id3()
 id3.MaximumGainAttribute = InformationGain.EntropyMaximumGainAttribute
-id3.Train(trainData, 8)
+id3.Train(trainData, 5)
 print("Training Error:", id3.Test(trainData))
 print()
 #id3.PrintTree(3)

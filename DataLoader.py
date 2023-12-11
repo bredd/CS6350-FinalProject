@@ -6,7 +6,7 @@ class DataLoader:
     def LoadKaggleTrain(limit=None):
         ds = DataSet()
         ds.Load("./Data/train_final.csv", 15, rowLimit=limit, hasTitleRow=True)
-        ds.PartitionColumn(0, "Age", 2)
+        ds.PartitionColumn(0, "Age", 5)
         ds.CategorizeColumn(1, "WorkClass", 0.05)
         ds.RemoveColumn(2) #fnlwgt
         ds.CategorizeColumn(2, "Education", 0.01)
@@ -18,7 +18,7 @@ class DataLoader:
         ds.CategorizeColumn(7, "Sex", 0.05)
         ds.CombineColumns(8, 9, lambda a, b: float(a)-float(b))
         ds.PartitionColumn(8, "CapitalGain", 3)
-        ds.PartitionColumn(9, "HoursPerWeek", 5)
+        ds.PartitionColumn(9, "HoursPerWeek", 3)
         ds.CategorizeColumn(10, "NativeCountry", 0.01)
         ds.CategorizeColumn(11, "y", 0.05)
         return ds
