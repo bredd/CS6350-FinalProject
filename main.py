@@ -1,6 +1,7 @@
 from DataLoader import *
 from Id3 import *
 from InformationGain import *
+from AdaBoost import *
 
 trainData = DataLoader.LoadKaggleTrain()
 #trainData.ReportDataTypes()
@@ -11,16 +12,27 @@ testData = DataLoader.LoadKaggleTest(trainData)
 #testData.ReportData(10)
 #print()
 
-id3 = Id3()
-id3.MaximumGainAttribute = InformationGain.EntropyMaximumGainAttribute
-id3.Train(trainData, 5)
-print("Training Error:", id3.Test(trainData))
-print()
+#ID3 Algorithm
+#id3 = Id3()
+#id3.MaximumGainAttribute = InformationGain.EntropyMaximumGainAttribute
+#id3.Train(trainData, 5)
+#print("Training Error:", id3.Test(trainData))
+#print()
 #id3.PrintTree(3)
+#predictions = id3.Predict(testData)
 
-predictions = id3.Predict(testData)
-DataLoader.WritePredictions(testData, predictions)
-print("Predictions.csv written.")
+#AdaBoost Algorithm
+ada = AdaBoost()
+for i in range(500):
+    ada.Train(trainData)
+    trainE = ada.GetError(trainData)
+    if i % 10 == 0:
+        print("At iteration", i, "trainE:", trainE)
+
+
+
+#DataLoader.WritePredictions(testData, predictions)
+#print("Predictions.csv written.")
 
 
 
