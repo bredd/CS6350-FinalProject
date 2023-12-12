@@ -50,6 +50,7 @@ class AdaBoost:
         colCount = len(data)
         rowCount = len(data[0])
 
+        predictions = []
         for i in range(rowCount):
             predictions.append(self.__Classify(dataSet, i))
         return predictions

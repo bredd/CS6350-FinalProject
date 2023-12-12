@@ -23,16 +23,16 @@ testData = DataLoader.LoadKaggleTest(trainData)
 
 #AdaBoost Algorithm
 ada = AdaBoost()
-for i in range(500):
+for i in range(250):
     ada.Train(trainData)
     trainE = ada.GetError(trainData)
     if i % 10 == 0:
         print("At iteration", i, "trainE:", trainE)
+print("Train Error:", trainE)
+predictions = ada.Predict(testData)
 
-
-
-#DataLoader.WritePredictions(testData, predictions)
-#print("Predictions.csv written.")
+DataLoader.WritePredictions(testData, predictions)
+print("Predictions.csv written.")
 
 
 
