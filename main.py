@@ -25,7 +25,7 @@ testData = DataLoader.LoadKaggleTest(trainData)
 ada = AdaBoost()
 bestIterations = 0
 bestError = 1.0
-for i in range(250):
+for i in range(300):
     ada.Train(trainData)
     trainE = ada.GetError(trainData)
     if bestError > trainE:

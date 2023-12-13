@@ -1,5 +1,6 @@
 from collections import Counter
 from collections import defaultdict
+import random
 
 class DataType:
     def __init__(self, name):
@@ -166,6 +167,26 @@ class DataSet:
         col = self.Data[colNum]
         for i in range(len(col)):
             col[i] = 1 if col[i] > 0 else -1
+
+    def Split(self, rSeed):
+        random.seed(rSeed)
+        data=self.Data
+        colCount=len(data)
+        rowCount=len(data[0])
+        dataOut = []
+        dataOut.append([[] for j in range(colCount)])
+        dataOut.append([[] for j in range(colCount)])
+        for i in range(rowCount):
+            r = random.randint(0,1)
+            for j in range(colCount):
+                dataOut[r][j].append(data[j][i])
+        ds0 = DataSet()
+        ds0.DataTypes = self.DataTypes
+        ds0.Data = dataOut[0]
+        ds1 = DataSet()
+        ds1.DataTypes = self.DataTypes
+        ds1.Data = dataOut[1]
+        return (ds0, ds1)
 
     @staticmethod
     def MapData(data, map, otherValue):

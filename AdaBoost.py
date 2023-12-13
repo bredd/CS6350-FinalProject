@@ -143,6 +143,7 @@ class AdaBoost:
         entropy2 = 0
         for i in range(categoryCount):
             twa = waTrue[i]/(waTrue[i]+waFalse[i])
+            if twa == 0: twa = 0.00001/waFalse[i]
             entropy += counts[i]/rowCount * (-twa*math.log2(twa) - (1-twa)*math.log2(1-twa))
         return entropy
 
