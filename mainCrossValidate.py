@@ -6,12 +6,14 @@ from AdaBoost import *
 # Use Cross-Validation to optimize a parameter
 
 # Optimize Hours Partition Count
-Column = 9
-Range = range(8, 14)
+Column = 4
+Range = [0.00065, 0.0008, 0.0009, 0.001, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.07, 0.08, 0.10, 0.25]
+#Range = range(5, 16)
 TrainingIterations = 250
 
 bestErr = 1
 bestArg = 0
+results = []
 for arg in Range:
     print("-----")
     dsAll = DataLoader.LoadKaggleTrain(overrideCol=Column, overrideVal=arg)
@@ -30,8 +32,11 @@ for arg in Range:
 
     avgErr = sumErr/4
     print("Arg:", arg, "Err", avgErr)
+    results.append((arg, avgErr))
     if (bestErr > avgErr):
         bestErr = avgErr
         bestArg = arg
 
 print("Best arg for column %d is %g" % (Column, bestArg))
+for pair in results:
+    print("%g: %g" % pair)
