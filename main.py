@@ -4,7 +4,7 @@ from InformationGain import *
 from AdaBoost import *
 
 trainData = DataLoader.LoadKaggleTrain()
-trainData.ReportDataTypes()
+#trainData.ReportDataTypes()
 #print()
 #trainData.ReportData(10)
 #print()
@@ -22,16 +22,18 @@ testData = DataLoader.LoadKaggleTest(trainData)
 #predictions = id3.Predict(testData)
 
 #AdaBoost Algorithm
+Iterations=280
 ada = AdaBoost()
 bestIterations = 0
 bestError = 1.0
-for i in range(300):
+for i in range(Iterations):
     ada.Train(trainData)
     trainE = ada.GetError(trainData)
     if bestError > trainE:
         bestError = trainE
         bestIterations = i
         print("At iteration", i, "trainE:", trainE)
+print("After %d iterations:" % Iterations)
 print("Train Error:", trainE)
 predictions = ada.Predict(testData)
 
