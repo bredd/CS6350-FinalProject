@@ -6,9 +6,9 @@ from AdaBoost import *
 # Use Cross-Validation to optimize a parameter
 
 # Optimize Hours Partition Count
-Column = 4
-Range = [0.00065, 0.0008, 0.0009, 0.001, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.07, 0.08, 0.10, 0.25]
-#Range = range(5, 16)
+Column = 2
+#Range = [0.00065, 0.0008, 0.0009, 0.001, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.07, 0.08, 0.10, 0.25]
+Range = range(2, 16)
 TrainingIterations = 250
 
 bestErr = 1

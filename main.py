@@ -22,10 +22,11 @@ testData = DataLoader.LoadKaggleTest(trainData)
 #predictions = id3.Predict(testData)
 
 #AdaBoost Algorithm
-Iterations=280
+Iterations=270
 ada = AdaBoost()
 bestIterations = 0
 bestError = 1.0
+print("Performing %d AdaBoost training iterations." % Iterations)
 for i in range(Iterations):
     ada.Train(trainData)
     trainE = ada.GetError(trainData)
@@ -39,6 +40,3 @@ predictions = ada.Predict(testData)
 
 DataLoader.WritePredictions(testData, predictions)
 print("Predictions.csv written.")
-
-
-
